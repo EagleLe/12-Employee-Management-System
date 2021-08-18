@@ -212,3 +212,54 @@ function viewDepartments() {
     });
     menuChoices();
 }
+function addRole() {
+
+    var query =
+        `SELECT d.id, d.name, r.salary AS budget FROM employee e JOIN role r ON e.role_id = r.id JOIN department d ON d.id = r.department_id GROUP BY d.id, d.name`
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+
+        const departmentChoices = res.map(({ id, name }) => ({
+            value: id,
+            name: `${id} ${name}`
+        }));
+
+        inquirer
+            .prompt([{
+                    type: "input",
+                    name: "title",
+                    message: "Role title?"
+                },
+                {
+                    type: "input",
+                    name: "salary",
+                    message: "Role Salary"
+                },
+                {
+                    type: "list",
+                    name: "departmentId",
+                    message: "Department?",
+                    choices: departmentChoices
+                },
+            ])
+            .then(function(answer) {
+
+                var query = `INSERT INTO role SET ?`
+
+                connection.query(query, {
+                    title: answer.title,
+                    salary: answer.salary,
+                    department_id: answer.departmentId
+                }, (err, res) => {
+                    if (err) throw err;
+
+                    console.table(res);
+
+                    menuChoices();
+                });
+
+            });
+
+    });
+}
